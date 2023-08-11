@@ -17,6 +17,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ALLOWED_VIDEO_EXTENSIONS = set(['mp4', 'avi', 'mov'])
 
+# resize image
+def resize_image(image, new_width, new_height):
+    try:
+        resized_image = image.resize((new_width, new_height))
+        return resized_image
+    except Exception as e:
+        print("Error:", e)
+        return None
+    
 #convert video in gif
 def allowed_video_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEO_EXTENSIONS
@@ -76,6 +85,36 @@ def get_snapshot():
     except Exception as e:
         return {'error': str(e)}, 500
 
+@app.route('/resize-image', methods=['POST'])
+def resize_image_api():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part in the request'}), 400
+        
+        image = request.files['file']
+        
+        new_width = int(request.form.get('width', 80))
+        new_height = int(request.form.get('height', 60))
+
+        if image and image.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+            image_stream = io.BytesIO(image.read())
+            pil_image = Image.open(image_stream)
+            
+            resized_image = resize_image(pil_image, new_width, new_height)
+            if resized_image:
+                output_stream = io.BytesIO()
+                resized_image.save(output_stream, format='JPEG')
+                output_stream.seek(0)
+                
+                return send_file(output_stream, mimetype='image/jpeg')
+            else:
+                return jsonify({'error': 'Error resizing image'}), 500
+        else:
+            return jsonify({'error': 'Invalid image format. Allowed formats: jpg, jpeg, png.'}), 400
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 @app.route("/convert-to-gif", methods=["POST"])
 def convert_to_gif_endpoint():
     try:
