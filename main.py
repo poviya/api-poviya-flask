@@ -4,13 +4,28 @@ import os
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageFont
 import io
-from werkzeug.utils import secure_filename
 from moviepy.editor import VideoFileClip,TextClip, CompositeVideoClip
 from pydub import AudioSegment
 import moviepy.editor as mp
 import numpy as np
+import requests
+
+UPLOAD_FOLDER = 'static/files'
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+ALLOWED_VIDEO_EXTENSIONS = set(['mp4', 'avi', 'mov'])
+
+#convert video in gif
+def allowed_video_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEO_EXTENSIONS
+
+def convert_to_gif(video_path):
+    video = VideoFileClip(video_path)
+    gif_path = os.path.splitext(video_path)[0] + '.gif'
+    video.write_gif(gif_path)
+    return gif_path
 
 @app.route('/')
 def index():
@@ -22,7 +37,10 @@ def get_snapshot():
         video = request.files['file']
 
         if video and video.filename.endswith(('.mp4', '.avi', '.mov')):
-            video_path = 'input_video.mp4'
+
+            video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'input_video.mp4')
+            snapshot_path = os.path.join(app.config['UPLOAD_FOLDER'], 'snapshot.png')
+        
             video.save(video_path)
 
             video_clip = VideoFileClip(video_path)
@@ -31,22 +49,57 @@ def get_snapshot():
             snapshot_np = np.array(snapshot)
             snapshot_image = Image.fromarray(snapshot_np)
 
-            snapshot_path = 'snapshot.png'
             snapshot_image.save(snapshot_path)
 
             # Cierra el archivo de video
-            #video_clip.reader.close()
+            video_clip.reader.close()
 
             # Elimina el archivo local de video
             #os.remove(video_path)
 
             return send_file(snapshot_path, as_attachment=True)
 
+            # Envía el archivo de snapshot a NestJS
+            #nestjs_url = 'http://tu-servidor-nestjs.com/upload-snapshot'
+            #files = {'file': open(snapshot_path, 'rb')}
+            #response = requests.post(nestjs_url, files=files)
+
+            #if response.status_code == 200:
+            #    return send_file(snapshot_path, as_attachment=True)
+            #else:
+            #    return {'error': 'Error al enviar snapshot a NestJS'}, 500
+            
+
         else:
             return {'error': 'Debe proporcionar un video válido (formato: mp4, avi, mov).'}, 400
 
     except Exception as e:
         return {'error': str(e)}, 500
+
+@app.route("/convert-to-gif", methods=["POST"])
+def convert_to_gif_endpoint():
+    try:
+        video = request.files["file"]
+
+        if video:
+            #video_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(video.filename))
+            video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'input_video.mp4')
+            gif_path = os.path.join(app.config['UPLOAD_FOLDER'], 'input_video.gif')
+
+            video.save(video_path)
+
+            gif_path = convert_to_gif(video_path)
+
+            # Eliminar el archivo de video después de convertirlo
+            #os.remove(video_path)
+
+            #return jsonify({"message": "Video converted to GIF successfully.", "gif_path": gif_path})
+            return send_file(gif_path, as_attachment=True)
+        else:
+            return jsonify({"error": "Invalid video format. Allowed formats: mp4, avi, mov."}), 400
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     
 if __name__ == '__main__':
     app.run(debug=True, port=os.getenv("PORT", default=5000))
