@@ -1,8 +1,13 @@
 from flask import Flask, request, jsonify, send_file
 import os
 
-from moviepy.editor import VideoFileClip,TextClip, CompositeVideoClip
+from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageFont
+import io
+from werkzeug.utils import secure_filename
+from moviepy.editor import VideoFileClip,TextClip, CompositeVideoClip
+from pydub import AudioSegment
+import moviepy.editor as mp
 import numpy as np
 
 app = Flask(__name__)
