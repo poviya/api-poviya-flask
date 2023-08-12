@@ -18,8 +18,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_VIDEO_EXTENSIONS = set(['mp4', 'avi', 'mov'])
 
 # resize image
-def resize_image(image, new_width, new_height):
+def resize_image(image, fixed_height):
     try:
+        width, height = image.size
+        new_width = int((width / height) * fixed_height)
+        new_height = fixed_height
         resized_image = image.resize((new_width, new_height))
         return resized_image
     except Exception as e:
@@ -92,16 +95,17 @@ def resize_image_api():
             return jsonify({'error': 'No file part in the request'}), 400
         
         image = request.files['file']
-        
-        new_width = int(request.form.get('width', 80))
-        new_height = int(request.form.get('height', 60))
+        fixed_height = 60
 
-        if image and image.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+        if image and image.filename.lower().endswith(('.jpg', '.jpeg', '.png', '.jfif')):
             image_stream = io.BytesIO(image.read())
             pil_image = Image.open(image_stream)
             
-            resized_image = resize_image(pil_image, new_width, new_height)
+            resized_image = resize_image(pil_image, fixed_height)
             if resized_image:
+                # Convertir la imagen a modo RGB antes de guardar como JPEG
+                resized_image = resized_image.convert("RGB")
+                
                 output_stream = io.BytesIO()
                 resized_image.save(output_stream, format='JPEG')
                 output_stream.seek(0)
