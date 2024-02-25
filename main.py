@@ -144,5 +144,78 @@ def convert_to_gif_endpoint():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@app.route("/telegram_message", methods=["POST"])
+def telegram_message():
+    try:
+
+        data = request.json
+        chat_id = data.get("chat_id")
+        message = data.get("message")
+
+        # Token de acceso del bot de Telegram
+        TOKEN = '5818670079:AAH5-IpP2SQIRC6qqF4SD9BcX5KAUuN9HeI'
+
+        # ID del chat del bot
+        #chat_id = '-1002115848401'
+
+        # URL de la API de Telegram para enviar messages
+        url = f'https://api.telegram.org/bot{TOKEN}/sendMessage'
+
+        # Parámetros del message
+        params = {
+            'chat_id': chat_id,
+            'text': message
+        }
+
+        # Envío del message
+        response = requests.post(url, json=params)
+
+        # Verificación de la respuesta
+        if response.status_code == 200:
+            return jsonify({"message": "message enviado con éxito."}), 200
+        else:
+            return jsonify({"error": f"Error al enviar el message: {response.status_code} {response.text}"}), 500
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/telegram_message_media", methods=["POST"])
+def telegram_message_media():
+    try:
+        data = request.json
+        chat_id = data.get("chat_id")
+        message = data.get("message")
+        media = data.get("media")
+        file_url = data.get("file_url")
+
+        if not chat_id or not message or not media or not file_url:
+            return jsonify({"error": "chat_id, message, media, and file_url are required fields"}), 400
+
+        # Token de acceso del bot de Telegram
+        TOKEN = '5818670079:AAH5-IpP2SQIRC6qqF4SD9BcX5KAUuN9HeI'
+
+        # URL de la API de Telegram para enviar imágenes o videos
+        url = f'https://api.telegram.org/bot{TOKEN}/sendPhoto' if media == 'photo' else f'https://api.telegram.org/bot{TOKEN}/sendVideo'
+
+        # Parámetros del mensaje
+        params = {
+            'chat_id': chat_id,
+            'caption': message,
+            'photo' if media == 'photo' else 'video': file_url
+        }
+
+        # Envío del mensaje, imagen o video
+        response = requests.post(url, json=params)
+
+        # Verificación de la respuesta
+        if response.status_code == 200:
+            return jsonify({"message": "Mensaje enviado con éxito."}), 200
+        else:
+            return jsonify({"error": f"Error al enviar el archivo: {response.status_code} {response.text}"}), 500
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
-    app.run(debug=True, port=os.getenv("PORT", default=5000))
+    app.run(debug=True, port=os.getenv("PORT", default=5001))
