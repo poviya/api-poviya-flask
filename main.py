@@ -43,7 +43,7 @@ def convert_to_gif(video_path):
 def index():
     return jsonify({"Choo Choo": "Welcome to your Flask app 🚅"})
 
-@app.route('/get-snapshot', methods=['POST'])
+@app.route('/api/get-snapshot', methods=['POST'])
 def get_snapshot():
     try:
         video = request.files['file']
@@ -88,7 +88,7 @@ def get_snapshot():
     except Exception as e:
         return {'error': str(e)}, 500
 
-@app.route('/resize-image', methods=['POST'])
+@app.route('/api/resize-image', methods=['POST'])
 def resize_image_api():
     try:
         if 'file' not in request.files:
@@ -119,7 +119,7 @@ def resize_image_api():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-@app.route("/convert-to-gif", methods=["POST"])
+@app.route("/api/convert-to-gif", methods=["POST"])
 def convert_to_gif_endpoint():
     try:
         video = request.files["file"]
@@ -144,7 +144,7 @@ def convert_to_gif_endpoint():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route("/telegram_message", methods=["POST"])
+@app.route("/api/telegram_message", methods=["POST"])
 def telegram_message():
     try:
 
@@ -179,7 +179,7 @@ def telegram_message():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route("/telegram_message_media", methods=["POST"])
+@app.route("/api/telegram_message_media", methods=["POST"])
 def telegram_message_media():
     try:
         data = request.json
