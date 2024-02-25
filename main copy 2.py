@@ -1,3 +1,4 @@
+from bson import ObjectId
 from flask import Flask, request, jsonify, send_file
 import os
 from werkzeug.utils import secure_filename
@@ -178,7 +179,7 @@ def telegram_message():
 
         # Verificación de la respuesta
         if response.status_code == 200:
-            return jsonify({"message": "message enviado con éxito."}), 200
+            return jsonify({"ok": "true", "message": "Message sent successfully."}), 200
         else:
             return jsonify({"error": f"Error al enviar el message: {response.status_code} {response.text}"}), 500
     
@@ -215,23 +216,40 @@ def telegram_message_media():
 
         # Verificación de la respuesta
         if response.status_code == 200:
-            return jsonify({"message": "Mensaje enviado con éxito."}), 200
+            return jsonify({"ok": "true", "message": "Message sent successfully."}), 200
         else:
-            return jsonify({"error": f"Error al enviar el archivo: {response.status_code} {response.text}"}), 500
+            return jsonify({"error": "Error sending the file: {response.status_code} {response.text}"}), 500
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/users_find_all", methods=["POST"])
-def usersFindAll():
+@app.route("/post_one", methods=["POST"])
+def post_one():
     try:
-        users_collection = db['users']
-        users = users_collection.find()
+        post_collection = db['posts']
+        
+        data = request.json
+        post_id = data.get("id")
+        post_id_obj = ObjectId(post_id)
+        post = post_collection.find_one({"_id": post_id_obj})
 
-        for user in users:
-            print(user)
+        if post:
+            # Convertir el ObjectId a una cadena en PostMedia
+            post['PostMedia'] = [str(media_id) for media_id in post['PostMedia']]
+            post['_id'] = str(post['_id'])
+            post['Site'] = str(post['Site'])
+            post['User'] = str(post['User'])
 
-        return jsonify(users)
+            # Obtener los documentos referenciados en PostMedia
+            post_media_collection = db['post_media']
+            post_media_docs = post_media_collection.find({"_id": {"$in": ObjectId(post['PostMedia'])}})
+
+            # Agregar los documentos referenciados a PostMedia
+            post['PostMedia'] = [media_doc for media_doc in post_media_docs]
+
+            return jsonify(post)
+        else:
+            return jsonify({"error": "Post not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

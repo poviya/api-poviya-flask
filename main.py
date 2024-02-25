@@ -1,6 +1,6 @@
-from bson import ObjectId
 from flask import Flask, request, jsonify, send_file
 import os
+
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -9,13 +9,6 @@ from pydub import AudioSegment
 import moviepy.editor as mp
 import numpy as np
 import requests
-from pymongo import MongoClient
-
-# Conexión a la base de datos MongoDB
-client = MongoClient('mongodb://ue2g5msik4gkxati5lj3:xoj1Sbtcyp5UHW1870d@b2dhwys4he0suwxbecrc-mongodb.services.clever-cloud.com:2143/b2dhwys4he0suwxbecrc', 27017)
-
-# Selección de la base de datos
-db = client['b2dhwys4he0suwxbecrc']
 
 UPLOAD_FOLDER = 'static/files'
 
@@ -179,7 +172,7 @@ def telegram_message():
 
         # Verificación de la respuesta
         if response.status_code == 200:
-            return jsonify({"ok": "true", "message": "Message sent successfully."}), 200
+            return jsonify({"message": "message enviado con éxito."}), 200
         else:
             return jsonify({"error": f"Error al enviar el message: {response.status_code} {response.text}"}), 500
     
@@ -216,42 +209,13 @@ def telegram_message_media():
 
         # Verificación de la respuesta
         if response.status_code == 200:
-            return jsonify({"ok": "true", "message": "Message sent successfully."}), 200
+            return jsonify({"message": "Mensaje enviado con éxito."}), 200
         else:
-            return jsonify({"error": "Error sending the file: {response.status_code} {response.text}"}), 500
+            return jsonify({"error": f"Error al enviar el archivo: {response.status_code} {response.text}"}), 500
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/post_one", methods=["POST"])
-def post_one():
-    try:
-        post_collection = db['posts']
-        
-        data = request.json
-        post_id = data.get("id")
-        post_id_obj = ObjectId(post_id)
-        post = post_collection.find_one({"_id": post_id_obj})
-
-        if post:
-            # Convertir el ObjectId a una cadena en PostMedia
-            post['PostMedia'] = [str(media_id) for media_id in post['PostMedia']]
-            post['_id'] = str(post['_id'])
-            post['Site'] = str(post['Site'])
-            post['User'] = str(post['User'])
-
-            # Obtener los documentos referenciados en PostMedia
-            post_media_collection = db['post_media']
-            post_media_docs = post_media_collection.find({"_id": {"$in": ObjectId(post['PostMedia'])}})
-
-            # Agregar los documentos referenciados a PostMedia
-            post['PostMedia'] = [media_doc for media_doc in post_media_docs]
-
-            return jsonify(post)
-        else:
-            return jsonify({"error": "Post not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=os.getenv("PORT", default=5001))
