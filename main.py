@@ -172,7 +172,7 @@ def telegram_message():
 
         # Verificación de la respuesta
         if response.status_code == 200:
-            return jsonify({"message": "message enviado con éxito."}), 200
+            return jsonify({"ok": "true", "message": "Message sent successfully."}), 200
         else:
             return jsonify({"error": f"Error al enviar el message: {response.status_code} {response.text}"}), 500
     
@@ -209,9 +209,9 @@ def telegram_message_media():
 
         # Verificación de la respuesta
         if response.status_code == 200:
-            return jsonify({"message": "Mensaje enviado con éxito."}), 200
+            return jsonify({"ok": "true", "message": "Message sent successfully."}), 200
         else:
-            return jsonify({"error": f"Error al enviar el archivo: {response.status_code} {response.text}"}), 500
+            return jsonify({"error": "Error sending the file: {response.status_code} {response.text}"}), 500
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
