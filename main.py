@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_file
 import os
-#from flask_cors import CORS
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -13,7 +13,7 @@ import requests
 UPLOAD_FOLDER = 'static/files'
 
 app = Flask(__name__)
-#cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -41,7 +41,7 @@ def convert_to_gif(video_path):
     video.write_gif(gif_path)
     return gif_path
 
-@app.route('/')
+@app.route('/api/')
 def index():
     return jsonify({"Choo Choo": "Welcome to your Flask app 🚅"})
 
