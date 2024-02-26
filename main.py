@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_file
 import os
-from flask_cors import CORS
+#from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -13,7 +13,7 @@ import requests
 UPLOAD_FOLDER = 'static/files'
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/*": {"origins": "*"}})
+#cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
