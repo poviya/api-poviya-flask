@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_file
 import os
-from flask_cors import CORS  # Import CORS
+#from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageFont
 import io
