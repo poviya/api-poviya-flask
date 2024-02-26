@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_file
 import os
-
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -13,6 +13,8 @@ import requests
 UPLOAD_FOLDER = 'static/files'
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ALLOWED_VIDEO_EXTENSIONS = set(['mp4', 'avi', 'mov'])
