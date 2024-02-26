@@ -13,7 +13,8 @@ import requests
 UPLOAD_FOLDER = 'static/files'
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ALLOWED_VIDEO_EXTENSIONS = set(['mp4', 'avi', 'mov'])
