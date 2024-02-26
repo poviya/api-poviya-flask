@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify, send_file
 import os
-from flask_cors import CORS
+from flask_cors import CORS  # Import CORS
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageFont
 import io
-from moviepy.editor import VideoFileClip,TextClip, CompositeVideoClip
+from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 from pydub import AudioSegment
 import moviepy.editor as mp
 import numpy as np
@@ -14,7 +14,6 @@ UPLOAD_FOLDER = 'static/files'
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ALLOWED_VIDEO_EXTENSIONS = set(['mp4', 'avi', 'mov'])
