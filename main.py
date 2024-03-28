@@ -155,7 +155,7 @@ def telegram_message():
         message = data.get("message")
 
         # Token de acceso del bot de Telegram
-        TOKEN = '5818670079:AAH5-IpP2SQIRC6qqF4SD9BcX5KAUuN9HeI'
+        TOKEN = data.get("token")
 
         # ID del chat del bot
         #chat_id = '-1002115848401'
@@ -194,7 +194,8 @@ def telegram_message_media():
             return jsonify({"error": "chat_id, message, media, and file_url are required fields"}), 400
 
         # Token de acceso del bot de Telegram
-        TOKEN = '5818670079:AAH5-IpP2SQIRC6qqF4SD9BcX5KAUuN9HeI'
+        TOKEN =  TOKEN = data.get("token")
+        # TOKEN = '7060090793:AAH1pLQS4iedpXrECTZY3NshfdnAlWtrOPk'
 
         # URL de la API de Telegram para enviar imágenes o videos
         url = f'https://api.telegram.org/bot{TOKEN}/sendPhoto' if media == 'photo' else f'https://api.telegram.org/bot{TOKEN}/sendVideo'
